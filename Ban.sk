@@ -1,0 +1,7 @@
+command /server [<text>]:
+    permission: admin.use
+    permission message: &You don't have premission to use this command!
+    trigger:
+        # Om de har rättigheten händer ingenting (Velocity tar över)
+        # Om de INTE har rättigheten, stoppas det här.
+        stop
