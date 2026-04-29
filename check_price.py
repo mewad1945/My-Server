@@ -1,11 +1,12 @@
 import yaml
 import os
 
-# Sökvägen till din worth.yml (justera om den ligger någon annanstans)
+# Sökväg till din worth.yml
 worth_file = os.path.expanduser("~/eagler-network/smp/plugins/Essentials/worth.yml")
 
-# Lista på items vi vill kolla (Mappade till Minecraft-IDn)
-items_to_check = {
+# Lista på alla redstone-relaterade föremål du bad om
+# Nyckeln är ID:t i worth.yml, värdet är ett snyggt namn för utskrift
+items_to_find = {
     "daylight_detector": "Daylight Sensor",
     "dispenser": "Dispenser",
     "hopper": "Hopper",
@@ -24,35 +25,40 @@ items_to_check = {
     "sticky_piston": "Sticky Piston",
     "oak_pressure_plate": "Wooden Pressure Plate",
     "stone_pressure_plate": "Stone Pressure Plate",
-    "heavy_weighted_pressure_plate": "Weighted Pressure Plate (Heavy)",
-    "light_weighted_pressure_plate": "Weighted Pressure Plate (Light)",
+    "heavy_weighted_pressure_plate": "Heavy Pressure Plate",
+    "light_weighted_pressure_plate": "Light Pressure Plate",
     "oak_trapdoor": "Wooden Trapdoor",
     "iron_trapdoor": "Iron Trapdoor",
     "redstone": "Redstone Dust",
-    "crafter": "Auto Crafter"
+    "crafter": "Automatic Crafter"
 }
 
-def check_prices():
+def get_prices():
     if not os.path.exists(worth_file):
-        print(f"Error: Hittade inte filen på {worth_file}")
+        print(f"Fel: Hittade inte {worth_file}")
         return
 
     try:
         with open(worth_file, 'r') as f:
-            data = yaml.safe_load(f)
+            content = yaml.safe_load(f)
+        
+        # Essentials kan ha priserna direkt under 'worth' eller i roten
+        prices = content.get('worth', content)
+
+        print(f"\n{'ITEM ID':<30} | {'SÄLJPRIS (Worth)':<15}")
+        print("-" * 50)
+
+        for technical_id, display_name in items_to_find.items():
+            # Vi kollar både med och utan understreck för säkerhets skull
+            price = prices.get(technical_id)
             
-        # Essentials lagrar ofta priser under 'worth:'
-        prices = data.get('worth', {})
-
-        print(f"{'Item':<35} | {'Pris (worth.yml)':<15}")
-        print("-" * 55)
-
-        for internal_name, friendly_name in items_to_check.items():
-            price = prices.get(internal_name, "INTE SATT")
-            print(f"{friendly_name:<35} | {price:<15}")
+            if price is not None:
+                print(f"{technical_id:<30} | {price:<15.2f}")
+            else:
+                print(f"{technical_id:<30} | INTE SATT")
 
     except Exception as e:
         print(f"Ett fel uppstod: {e}")
 
 if __name__ == "__main__":
-    check_prices()
+    get_prices()
